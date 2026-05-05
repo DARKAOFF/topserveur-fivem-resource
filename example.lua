@@ -11,5 +11,5 @@ AddEventHandler('onPlayerVote', function(playername, date)
   --   Player.Functions.AddMoney('cash', 1000)
   -- end
 
-  print(('[TopServeurVote] %s a voté le %s'):format(playername, date))
+  print(('[UpServeurVote] %s a vote le %s'):format(playername, date))
 end)

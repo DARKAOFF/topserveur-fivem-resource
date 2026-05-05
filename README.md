@@ -1,90 +1,81 @@
-# TopServeur FiveM Vote Resource
+# UpServeur FiveM Vote Resource
 
-Resource FiveM officiel pour connecter un serveur GTA RP à TopServeur.
+Plugin officiel UpServeur pour connecter un serveur de jeu au système de vote UpServeur.
 
-Il permet de vérifier les votes via l'API publique TopServeur, de réclamer une récompense une seule fois, puis de déclencher un event serveur `onPlayerVote`.
-
-## Téléchargement
-
-- Repository : https://github.com/DARKAOFF/topserveur-fivem-resource
-- ZIP direct : https://github.com/DARKAOFF/topserveur-fivem-resource/archive/refs/heads/main.zip
+Cette ressource FiveM permet de vérifier les votes via l’API publique UpServeur, de réclamer une récompense une seule fois, puis de déclencher un événement serveur exploitable par tes scripts.
 
 ## Installation
 
-1. Téléchargez le ZIP.
-2. Décompressez le dossier dans les resources de votre serveur FiveM.
-3. Renommez le dossier en `topserveur_vote`.
-4. Ajoutez la configuration ci-dessous dans `server.cfg`.
-5. Redémarrez votre serveur ou lancez `ensure topserveur_vote`.
+1. Télécharge le dépôt ou le ZIP GitHub.
+2. Place le dossier dans `resources/[upserveur]/upserveur_vote`.
+3. Ajoute la configuration recommandée dans `server.cfg`.
+4. Lance `ensure upserveur_vote`.
 
 ```cfg
-ensure topserveur_vote
+ensure upserveur_vote
 
-set topserveur_token "VOTRE_TOKEN_SERVEUR"
-set topserveur_api_url "https://topserveur.fr/api/public/v1"
-set topserveur_check_interval 60
-set topserveur_identifier_type "username"
-set topserveur_debug "false"
+set upserveur_token "VOTRE_TOKEN_SERVEUR"
+set upserveur_api_url "https://upserveur.fr/api/public/v1"
+set upserveur_check_interval 60
+set upserveur_identifier_type "username"
+set upserveur_debug "false"
 ```
 
-## Configuration
+## Compatibilité ancienne configuration
+
+La ressource lit encore temporairement les anciennes variables :
+
+- `topserveur_token`
+- `topserveur_api_url`
+- `topserveur_check_interval`
+- `topserveur_identifier_type`
+- `topserveur_debug`
+
+Tu peux donc migrer sans casser un serveur déjà en production.
+
+## Variables
 
 | Variable | Valeur par défaut | Description |
 | --- | --- | --- |
-| `topserveur_token` | vide | Token disponible dans le dashboard TopServeur. |
-| `topserveur_api_url` | `https://topserveur.fr/api/public/v1` | URL de l'API publique. |
-| `topserveur_check_interval` | `60` | Intervalle en secondes pour vérifier les votes des joueurs connectés. |
-| `topserveur_identifier_type` | `username` | Mode d'identification du joueur. |
-| `topserveur_debug` | `false` | Affiche des logs détaillés dans la console serveur. |
+| `upserveur_token` | vide | Token serveur disponible sur UpServeur. |
+| `upserveur_api_url` | `https://upserveur.fr/api/public/v1` | Base URL API. |
+| `upserveur_check_interval` | `60` | Intervalle de vérification en secondes. |
+| `upserveur_identifier_type` | `username` | Mode d’identification du joueur. |
+| `upserveur_debug` | `false` | Active les logs détaillés. |
 
-## Modes d'identifiant
+## Modes d’identifiant
 
-`topserveur_identifier_type` peut valoir :
+- `username` : utilise le pseudo FiveM du joueur
+- `steam` : utilise le SteamID détecté
 
-- `username` : utilise le pseudo FiveM du joueur.
-- `steam` : utilise le SteamID du joueur.
+## Événements exposés
 
-Le mode choisi doit correspondre au type d'identifiant configuré dans le dashboard TopServeur.
+- `onUpServeurVote`
+- `onPlayerVote` reste déclenché temporairement pour compatibilité
 
-## Event disponible
-
-Ajoutez vos récompenses dans un fichier serveur, ou utilisez `example.lua`.
+Exemple :
 
 ```lua
-AddEventHandler('onPlayerVote', function(playername, date)
-  print(('[TopServeurVote] %s a voté le %s'):format(playername, date))
-
-  -- Exemple :
-  -- giveMoney(playername, 5000)
-  -- giveItem(playername, 'premium_case', 1)
+AddEventHandler("onUpServeurVote", function(playername, date)
+  print(("[UpServeurVote] %s a vote le %s"):format(playername, date))
 end)
 ```
 
-## Commande joueur
+## Commandes
 
-Un joueur peut forcer la vérification avec :
-
-```txt
-/topserveur_claimvote
-```
-
-## Sécurité
-
-- Ne partagez jamais votre `topserveur_token` publiquement.
-- Gardez le token uniquement côté serveur.
-- Si le token fuite, régénérez-le depuis le dashboard TopServeur.
-- Les routes `claim-*` consomment le vote et évitent les doubles récompenses.
+- `/upserveur_claimvote`
+- `/topserveur_claimvote` reste disponible temporairement
 
 ## Endpoints utilisés
 
 ```txt
-GET https://topserveur.fr/api/public/v1/votes/claim-username?server_token=TOKEN&playername=PSEUDO
-GET https://topserveur.fr/api/public/v1/votes/claim-steam?server_token=TOKEN&steam_id=STEAM_ID
+GET https://upserveur.fr/api/public/v1/votes/claim-username?server_token=TOKEN&playername=PSEUDO
+GET https://upserveur.fr/api/public/v1/votes/claim-steam?server_token=TOKEN&steam_id=STEAM_ID
 ```
 
 ## Dépannage
 
-- `Token manquant` : vérifiez `set topserveur_token`.
-- `SteamID introuvable` : le joueur n'a pas d'identifiant Steam détecté ou le serveur n'expose pas Steam.
-- `Aucun vote réclamable` : le joueur n'a pas voté récemment ou sa récompense a déjà été réclamée.
-- `API erreur HTTP` : vérifiez l'URL API, le token et la connectivité du serveur.
+- `Token manquant` : vérifie `set upserveur_token`
+- `SteamID introuvable` : le joueur n’expose pas Steam côté serveur
+- `Aucun vote réclamable` : pas de vote récent ou récompense déjà consommée
+- `API erreur HTTP` : vérifie l’URL, le token et la connectivité réseau

@@ -1,11 +1,33 @@
-TopServeurVote = {}
+local function getCompatConvar(primaryName, legacyName, defaultValue)
+  local primaryValue = GetConvar(primaryName, "")
+  if primaryValue ~= nil and primaryValue ~= "" then
+    return primaryValue
+  end
 
-TopServeurVote.Token = GetConvar('topserveur_token', '')
-TopServeurVote.ApiBaseUrl = GetConvar('topserveur_api_url', 'https://topserveur.fr/api/public/v1')
-TopServeurVote.CheckInterval = tonumber(GetConvar('topserveur_check_interval', '60')) or 60
-TopServeurVote.Debug = GetConvar('topserveur_debug', 'false') == 'true'
+  return GetConvar(legacyName, defaultValue)
+end
 
--- Type d'identifiant utilisé pour réclamer les votes.
+UpServeurVote = {}
+
+UpServeurVote.Token = getCompatConvar("upserveur_token", "topserveur_token", "")
+UpServeurVote.ApiBaseUrl = getCompatConvar(
+  "upserveur_api_url",
+  "topserveur_api_url",
+  "https://upserveur.fr/api/public/v1"
+)
+UpServeurVote.CheckInterval = tonumber(
+  getCompatConvar("upserveur_check_interval", "topserveur_check_interval", "60")
+) or 60
+UpServeurVote.Debug = getCompatConvar("upserveur_debug", "topserveur_debug", "false") == "true"
+
+-- Type d'identifiant utilise pour reclamer les votes.
 -- username : pseudo FiveM / nom joueur.
--- steam    : identifiant steam:hex converti et envoyé comme steam_id brut.
-TopServeurVote.IdentifierType = GetConvar('topserveur_identifier_type', 'username')
+-- steam    : identifiant steam:hex converti et envoye comme steam_id brut.
+UpServeurVote.IdentifierType = getCompatConvar(
+  "upserveur_identifier_type",
+  "topserveur_identifier_type",
+  "username"
+)
+
+-- Compatibility alias for older installs.
+TopServeurVote = TopServeurVote or UpServeurVote
